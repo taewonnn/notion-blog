@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 
 export default function Home() {
   return (
-    // min-h-screen으로 전체 높이 보장, grid로 3개 영역 분할
+    // min-h-screen으로 전체 높이 보장
     <div className="flex min-h-screen flex-col">
       {/* Header 영역 */}
       <header className="sticky top-0 z-50 border-b">
