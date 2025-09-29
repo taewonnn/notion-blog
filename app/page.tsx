@@ -1,15 +1,58 @@
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
 export default function Home() {
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-red-500 mb-4">Blog List</h1>
-      <div className="space-y-4">
-        <div className="bg-blue-100 p-4 rounded-lg">
-          <p className="text-blue-800">Tailwind CSS v4 테스트 - 이 박스가 파란색이면 성공!</p>
+    // min-h-screen으로 전체 높이 보장, grid로 3개 영역 분할
+    <div className="flex min-h-screen flex-col">
+      {/* Header 영역 */}
+      <header className="sticky top-0 z-50 border-b">
+        <div className="container mx-auto flex h-14 items-center px-4">
+          <a href="#" className="text-xl font-semibold">
+            <span className="font-bold">Notion Blog</span>
+          </a>
+          <nav className="ml-auto flex items-center gap-4">
+            <a href="#" className="hover:text-primary font-medium">
+              홈
+            </a>
+            <a href="#" className="hover:text-primary font-medium">
+              블로그
+            </a>
+            <a href="#" className="hover:text-primary font-medium">
+              소개
+            </a>
+          </nav>
         </div>
-        <div className="bg-green-100 p-4 rounded-lg">
-          <p className="text-green-800">기본 Tailwind 클래스들이 작동하는지 확인</p>
+      </header>
+
+      {/* Main 영역 */}
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-8">
+            {/* 섹션 제목 */}
+            <h2 className="text-3xl font-bold tracking-tight">블로그 목록</h2>
+
+            {/* 블로그 카드 그리드 */}
+            <div className="space-y-4">
+              {/* 블로그 카드 반복 */}
+              {[1, 2, 3].map((i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <CardTitle>블로그 제목 {i}</CardTitle>
+                    <CardDescription>이것은 블로그 포스트에 대한 간단한 설명입니다. 여러 줄의 텍스트가 있을 수 있습니다.</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer 영역 */}
+      <footer className="border-t">
+        <div className="container mx-auto flex h-14 items-center justify-center">
+          <p className="text-muted-foreground text-sm">Built with Next.js, Tailwind CSS and shadcn/ui</p>
+        </div>
+      </footer>
     </div>
   );
 }
