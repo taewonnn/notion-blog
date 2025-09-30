@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import Header from '@/components/layouts/Header';
+import Footer from '@/components/layouts/Footer';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -24,7 +26,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* min-h-screen으로 전체 높이 보장 */}
+        <div className="flex min-h-screen flex-col">
+          {/* Header 영역 */}
+          <Header />
+          <main className="flex-1">{children}</main>
+          {/* Footer 영역 */}
+          <Footer />
+        </div>
+      </body>
     </html>
   );
 }
