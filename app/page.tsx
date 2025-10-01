@@ -3,6 +3,7 @@ import { PostCard } from '@/components/features/blog/PostCard';
 import TagSection from './_components/TagSection';
 import ProfileSection from './_components/ProfileSection';
 import ContactSection from './_components/ContactSection';
+import Link from 'next/link';
 
 const mockTags = [
   { id: 'all', name: '전체', count: 20 },
@@ -64,7 +65,9 @@ export default function Home() {
           <div className="grid gap-4">
             {/* 블로그 카드 반복 */}
             {mockPosts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <Link href={`/blog/${post.id}`} key={post.id}>
+                <PostCard key={post.id} post={post} />
+              </Link>
             ))}
           </div>
         </div>
