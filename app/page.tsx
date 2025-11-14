@@ -25,7 +25,7 @@ const mockPosts = [
       { id: '2', name: 'React', count: 1 },
     ],
     authors: '짐코딩',
-    date: '2024-02-01',
+    date: '2025-10-01',
   },
   {
     id: '2',
@@ -37,7 +37,7 @@ const mockPosts = [
       { id: '4', name: 'JavaScript', count: 1 },
     ],
     authors: '짐코딩',
-    date: '2024-01-15',
+    date: '2025-11-15',
   },
 ];
 
