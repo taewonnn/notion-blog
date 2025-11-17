@@ -101,7 +101,14 @@ export const getPublishedPosts = async () => {
 
     const typedResults = response.results as (PageObjectResponse | PartialPageObjectResponse)[];
 
-    const posts = typedResults.filter((item): item is PageObjectResponse => item.object === 'page').map(mapPageToPost);
+    const posts = typedResults
+      .filter((item): item is PageObjectResponse => item.object === 'page')
+      .map(mapPageToPost)
+      .sort((a, b) => {
+        const dateA = a.date ?? a.modifiedDate ?? '';
+        const dateB = b.date ?? b.modifiedDate ?? '';
+        return dateB.localeCompare(dateA); // 최신순
+      });
 
     console.log('✅ Query 성공!');
     console.log('Response:', posts);
