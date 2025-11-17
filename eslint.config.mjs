@@ -25,6 +25,7 @@ const eslintConfig = [
     rules: {
       // 여기에 추가적인 규칙을 설정할 수 있습니다
       'no-unused-vars': 'warn',
+      '@typescript-eslint/no-require-imports': 'off', // require 허용
       // 'no-console': 'warn',
     },
   },
