@@ -38,9 +38,8 @@ export const getPublishedPosts = async () => {
     console.log('✅ Query 성공!');
     console.log('Response:', response);
     return response.results;
-  } catch (error: any) {
-    console.error('❌ Error:', error.message);
-    console.error('Error code:', error.code);
+  } catch (error: unknown) {
+    console.error('❌ Error:', (error as Error).message);
     throw error;
   }
 };
