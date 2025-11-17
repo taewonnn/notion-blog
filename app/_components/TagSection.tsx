@@ -1,17 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { NotionTag } from '@/types/notion';
+import { TagFilterItem } from '@/types/blog';
 import Link from 'next/link';
 
 interface ITagSection {
-  tags: NotionTag[];
+  tags: TagFilterItem[];
 }
+
 export default function TagSection({ tags }: ITagSection) {
   console.log(tags);
   return (
     <aside>
       <Card>
         <CardHeader>
-          <CardTitle>태그 목록!</CardTitle>
+          <CardTitle>태그 목록</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">

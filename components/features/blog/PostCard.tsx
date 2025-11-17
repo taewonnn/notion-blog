@@ -6,13 +6,14 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Calendar, User } from 'lucide-react';
 import Image from 'next/image';
-import { NotionPost } from '@/types/notion';
+import { Post } from '@/types/blog';
 
 interface PostCardProps {
-  post: NotionPost;
+  post: Post;
 }
 
 export function PostCard({ post }: PostCardProps) {
+  console.log('🔍 PostCard:', post);
   return (
     <Card className="group bg-card/50 border-border/40 hover:border-primary/20 overflow-hidden border backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
       {post.coverImage && (
@@ -31,8 +32,8 @@ export function PostCard({ post }: PostCardProps) {
       <CardContent className="p-6">
         <div className="mb-4 flex flex-wrap gap-2">
           {post.tags?.map((tag) => (
-            <Badge key={tag.id} variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 font-medium transition-colors">
-              {tag.name}
+            <Badge key={tag} variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 font-medium transition-colors">
+              {tag}
             </Badge>
           ))}
         </div>
