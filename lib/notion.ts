@@ -7,9 +7,11 @@ const notion = new Client({
 
 export const getPublishedPosts = async () => {
   try {
+    const databaseId = process.env.NOTION_DATABASE_ID!;
+
     // 1. database 정보 가져오기
     const database = await notion.databases.retrieve({
-      database_id: process.env.NOTION_DATABASE_ID!,
+      database_id: databaseId,
     });
 
     // 2. data source id
@@ -27,16 +29,18 @@ export const getPublishedPosts = async () => {
       },
       sorts: [
         {
-          timestampe: 'created_times',
+          timestamp: 'created_time',
           direction: 'descending',
         },
       ],
     });
 
+    console.log('✅ Query 성공!');
     console.log('Response:', response);
     return response.results;
-  } catch (error) {
-    console.error('Error:', error);
+  } catch (error: any) {
+    console.error('❌ Error:', error.message);
+    console.error('Error code:', error.code);
     throw error;
   }
 };
