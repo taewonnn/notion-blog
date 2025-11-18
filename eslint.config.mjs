@@ -29,6 +29,7 @@ const eslintConfig = [
       // 'no-console': 'warn',
     },
   },
+  { ignores: ['**/*.mdx'] }, // MDX 파일은 ESLint 검사에서 제외
   eslintConfigPrettier,
 ];
 
