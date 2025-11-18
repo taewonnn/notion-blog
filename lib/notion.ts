@@ -72,7 +72,7 @@ const mapPageToPost = (page: PageObjectResponse): Post => {
   };
 };
 
-export const getPublishedPosts = async () => {
+export const getPublishedPosts = async (tag?: string) => {
   try {
     const databaseId = process.env.NOTION_DATABASE_ID!;
 
@@ -91,6 +91,13 @@ export const getPublishedPosts = async () => {
           equals: 'Published',
         },
       },
+      and: [
+        {
+          property: 'Status',
+          select: { equals: 'Published' },
+          ...(tag && tag! == '전체' ? [{ property: 'Tags', multi_select: { contains: tag } }] : []),
+        },
+      ],
       sorts: [
         {
           timestamp: 'created_time',
