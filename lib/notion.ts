@@ -81,23 +81,35 @@ export const getPublishedPosts = async (tag?: string) => {
     });
 
     const dataSourceId = database.data_sources[0].id;
-    console.log('Database Source ID:', dataSourceId);
 
-    const response = await notion.dataSources.query({
-      data_source_id: dataSourceId,
-      filter: {
+    // 필터 조건 구성
+    const filterConditions: Array<{ property: 'Status'; select: { equals: string } } | { property: 'Tags'; multi_select: { contains: string } }> = [
+      {
         property: 'Status',
         select: {
           equals: 'Published',
         },
       },
-      and: [
-        {
-          property: 'Status',
-          select: { equals: 'Published' },
-          ...(tag && tag! == '전체' ? [{ property: 'Tags', multi_select: { contains: tag } }] : []),
+    ];
+
+    // 태그 필터 추가 (전체가 아닌 경우)
+    if (tag && tag !== '전체') {
+      filterConditions.push({
+        property: 'Tags',
+        multi_select: {
+          contains: tag,
         },
-      ],
+      });
+    }
+
+    const response = await notion.dataSources.query({
+      data_source_id: dataSourceId,
+      filter:
+        filterConditions.length === 1
+          ? filterConditions[0]
+          : {
+              and: filterConditions,
+            },
       sorts: [
         {
           timestamp: 'created_time',
