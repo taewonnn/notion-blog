@@ -9,6 +9,7 @@ import type {
   ListBlockChildrenResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import type { Post, TagFilterItem } from '@/types/blog';
+import { NotionToMarkdown } from 'notion-to-md';
 
 const { Client } = require('@notionhq/client');
 
@@ -21,6 +22,8 @@ const notion = new Client({
   auth: process.env.NOTION_API_KEY,
   notionVersion: '2025-09-03',
 });
+
+const n2m = new NotionToMarkdown({ notionClient: notion });
 
 const getPlainText = (richText?: Array<{ plain_text?: string }>) => {
   if (!richText?.length) return undefined;
@@ -254,7 +257,7 @@ export const getPostBySlug = async (slug: string) => {
     const page = typedResults.find((item) => item.object === 'page') as PageObjectResponse | undefined;
 
     if (!page) {
-      return null;
+      throw new Error('페이지를 찾을 수 없습니다.');
     }
 
     // 메타데이터 추출
@@ -262,10 +265,11 @@ export const getPostBySlug = async (slug: string) => {
 
     // 블록 데이터 가져오기
     const blocks = await getAllBlocks(page.id);
+    const mdBlocks = await n2m.blocksToMarkdown(blocks);
 
     return {
       metadata,
-      blocks,
+      mdBlocks,
     };
   } catch (error: unknown) {
     console.error('❌ Error:', error instanceof Error ? error.message : String(error));
