@@ -4,10 +4,18 @@ import type {
   UserObjectResponse,
   PartialUserObjectResponse,
   GroupObjectResponse,
+  BlockObjectResponse,
+  PartialBlockObjectResponse,
+  ListBlockChildrenResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import type { Post, TagFilterItem } from '@/types/blog';
 
 const { Client } = require('@notionhq/client');
+
+// children이 포함된 블록 타입
+type BlockWithChildren = (BlockObjectResponse | PartialBlockObjectResponse) & {
+  children?: BlockWithChildren[];
+};
 
 const notion = new Client({
   auth: process.env.NOTION_API_KEY,
@@ -28,6 +36,39 @@ const getCoverImage = (page: PageObjectResponse) => {
   if (page.cover.type === 'external') return page.cover.external.url;
   if (page.cover.type === 'file') return page.cover.file.url;
   return undefined;
+};
+
+// Notion 페이지의 모든 블록을 재귀적으로 가져오는 헬퍼 함수
+const getAllBlocks = async (pageId: string): Promise<BlockWithChildren[]> => {
+  const blocks: (BlockObjectResponse | PartialBlockObjectResponse)[] = [];
+  let cursor: string | undefined = undefined;
+
+  do {
+    const response: ListBlockChildrenResponse = await notion.blocks.children.list({
+      block_id: pageId,
+      start_cursor: cursor,
+    });
+
+    blocks.push(...response.results);
+
+    cursor = response.next_cursor ?? undefined;
+  } while (cursor);
+
+  // 중첩된 블록도 가져오기
+  const blocksWithChildren: BlockWithChildren[] = await Promise.all(
+    blocks.map(async (block): Promise<BlockWithChildren> => {
+      if ('has_children' in block && block.has_children && 'id' in block) {
+        const children = await getAllBlocks(block.id);
+        return {
+          ...block,
+          children,
+        } as BlockWithChildren;
+      }
+      return block as BlockWithChildren;
+    })
+  );
+
+  return blocksWithChildren;
 };
 
 // 그룹이 아닌 사용자만 추출
@@ -72,6 +113,7 @@ const mapPageToPost = (page: PageObjectResponse): Post => {
   };
 };
 
+// 게시글 조회
 export const getPublishedPosts = async (tag?: string) => {
   try {
     const databaseId = process.env.NOTION_DATABASE_ID!;
@@ -129,8 +171,8 @@ export const getPublishedPosts = async (tag?: string) => {
         return dateB.localeCompare(dateA); // 최신순
       });
 
-    console.log('✅ Query 성공!');
-    console.log('Response:', posts);
+    // console.log('✅ Query 성공!');
+    // console.log('!!!esponse:', posts);
     return posts;
   } catch (error: unknown) {
     console.error('❌ Error:', error instanceof Error ? error.message : String(error));
@@ -138,6 +180,7 @@ export const getPublishedPosts = async (tag?: string) => {
   }
 };
 
+// 태그 조회
 export const getTags = async (): Promise<TagFilterItem[]> => {
   const posts = await getPublishedPosts();
 
@@ -171,4 +214,61 @@ export const getTags = async (): Promise<TagFilterItem[]> => {
   const sortedTags = restTags.sort((a, b) => a.name.localeCompare(b.name));
 
   return [allTag, ...sortedTags];
+};
+
+// 게시글 상세 조회
+export const getPostBySlug = async (slug: string) => {
+  try {
+    const databaseId = process.env.NOTION_DATABASE_ID!;
+
+    const database = await notion.databases.retrieve({
+      database_id: databaseId,
+    });
+
+    const dataSourceId = database.data_sources[0].id;
+
+    // Slug와 Status가 Published인 조건으로 필터링
+    const response = await notion.dataSources.query({
+      data_source_id: dataSourceId,
+      filter: {
+        and: [
+          {
+            property: 'Slug',
+            rich_text: {
+              equals: slug,
+            },
+          },
+          {
+            property: 'Status',
+            select: {
+              equals: 'Published',
+            },
+          },
+        ],
+      },
+    });
+
+    const typedResults = response.results as (PageObjectResponse | PartialPageObjectResponse)[];
+
+    // 페이지 찾기
+    const page = typedResults.find((item) => item.object === 'page') as PageObjectResponse | undefined;
+
+    if (!page) {
+      return null;
+    }
+
+    // 메타데이터 추출
+    const metadata = mapPageToPost(page);
+
+    // 블록 데이터 가져오기
+    const blocks = await getAllBlocks(page.id);
+
+    return {
+      metadata,
+      blocks,
+    };
+  } catch (error: unknown) {
+    console.error('❌ Error:', error instanceof Error ? error.message : String(error));
+    throw error;
+  }
 };

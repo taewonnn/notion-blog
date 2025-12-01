@@ -3,6 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Clock, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { getPostBySlug } from '@/lib/notion';
 
 interface TableOfContentsItem {
   id: string;
@@ -103,7 +104,19 @@ function TableOfContentsLink({ item }: { item: TableOfContentsItem }) {
   );
 }
 
-export default function BlogPost() {
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+
+  const result = await getPostBySlug(slug);
+
+  if (!result) {
+    return <div>게시글을 찾을 수 없습니다.</div>;
+  }
+
+  const { blocks, metadata } = result;
+  console.log('!!!blocks', blocks);
+  console.log('post', metadata);
+
   return (
     <div className="container py-12">
       <div className="grid grid-cols-[240px_1fr_240px] gap-8">
@@ -111,28 +124,30 @@ export default function BlogPost() {
 
         {/* 블로그 헤더 */}
         <section>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Badge>프론트엔드</Badge>
-              <h1 className="text-4xl font-bold">Next.js와 Shadcn UI로 블로그 만들기</h1>
-            </div>
+          {metadata && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flexgap-2">{metadata.tags && metadata.tags.map((tag) => <Badge key={tag}>{tag}</Badge>)}</div>
+                <h1 className="text-4xl font-bold">{metadata.title}</h1>
+              </div>
 
-            {/* 메타 정보 */}
-            <div className="text-muted-foreground flex gap-4 text-sm">
-              <div className="flex items-center gap-1">
-                <User className="h-4 w-4" />
-                <span>홍길동</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <CalendarDays className="h-4 w-4" />
-                <span>2024년 3월 15일</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                <span>5분 읽기</span>
+              {/* 메타 정보 */}
+              <div className="text-muted-foreground flex gap-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  <span>{metadata.author}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CalendarDays className="h-4 w-4" />
+                  <span>{metadata.date}</span>
+                </div>
+                {/* <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  5분 읽기
+                </div> */}
               </div>
             </div>
-          </div>
+          )}
 
           <Separator className="my-8" />
 

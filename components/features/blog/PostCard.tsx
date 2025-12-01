@@ -13,7 +13,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
-  console.log('🔍 PostCard:', post);
+  // console.log('🔍 PostCard:', post);
   return (
     <Card className="group bg-card/50 border-border/40 hover:border-primary/20 overflow-hidden border backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
       {post.coverImage && (
