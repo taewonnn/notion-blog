@@ -9,98 +9,30 @@ import { blocksToMarkdown } from '@/lib/markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-pretty-code';
 import rehypePrettyCode from 'rehype-pretty-code';
+import rehypeSlug from 'rehype-slug';
+import { compile } from '@mdx-js/mdx';
+import withSlugs from 'rehype-slug';
+import withToc from '@stefanprobst/rehype-extract-toc';
+import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
 
-interface TableOfContentsItem {
-  id: string;
-  title: string;
-  items?: TableOfContentsItem[];
+interface TocEntry {
+  value: string;
+  depth: number;
+  id?: string;
+  children?: Array<TocEntry>;
 }
 
-const mockTableOfContents: TableOfContentsItem[] = [
-  {
-    id: 'intro',
-    title: '소개',
-    items: [],
-  },
-  {
-    id: 'getting-started',
-    title: '시작하기',
-    items: [
-      {
-        id: 'prerequisites',
-        title: '사전 준비사항',
-        items: [
-          {
-            id: 'node-installation',
-            title: 'Node.js 설치',
-          },
-          {
-            id: 'npm-setup',
-            title: 'NPM 설정',
-          },
-        ],
-      },
-      {
-        id: 'project-setup',
-        title: '프로젝트 설정',
-        items: [
-          {
-            id: 'create-project',
-            title: '프로젝트 생성',
-          },
-          {
-            id: 'folder-structure',
-            title: '폴더 구조',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'shadcn-ui-setup',
-    title: 'Shadcn UI 설정하기',
-    items: [
-      {
-        id: 'installation',
-        title: '설치 방법',
-        items: [
-          {
-            id: 'cli-installation',
-            title: 'CLI 도구 설치',
-          },
-          {
-            id: 'component-setup',
-            title: '컴포넌트 설정',
-          },
-        ],
-      },
-      {
-        id: 'configuration',
-        title: '환경 설정',
-        items: [
-          {
-            id: 'theme-setup',
-            title: '테마 설정',
-          },
-          {
-            id: 'typography',
-            title: '타이포그래피',
-          },
-        ],
-      },
-    ],
-  },
-];
+type Toc = Array<TocEntry>;
 
-function TableOfContentsLink({ item }: { item: TableOfContentsItem }) {
+function TableOfContentsLink({ item }: { item: TocEntry }) {
   return (
     <div className="space-y-2">
       <Link key={item.id} href={`#${item.id}`} className={`hover:text-foreground text-muted-foreground block font-medium transition-colors`}>
-        {item.title}
+        {item.value}
       </Link>
-      {item.items && item.items.length > 0 && (
+      {item.children && item.children.length > 0 && (
         <div className="space-y-2 pl-4">
-          {item.items.map((subItem) => (
+          {item.children.map((subItem) => (
             <TableOfContentsLink key={subItem.id} item={subItem} />
           ))}
         </div>
@@ -122,6 +54,17 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   // 재귀적으로 모든 블록(children 포함)을 마크다운으로 변환
   const markdownContent = blocksToMarkdown(mdBlocks).join('\n\n');
+
+  const { data: listOfContents } = await compile(markdownContent, {
+    rehypePlugins: [
+      withSlugs,
+      rehypeSanitize,
+      withToc,
+      withTocExport,
+      /** Optionally, provide a custom name for the export. */
+      // [withTocExport, { name: 'toc' }],
+    ],
+  });
 
   return (
     <div className="container py-12">
@@ -158,10 +101,10 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <Separator className="my-8" />
 
           {/* 블로그 본문 */}
-          <div className="prose prose-neutral prose-sm dark:prose-invert max-w-none">
+          <div className="prose prose-neutral prose-sm dark:prose-invert max-w-none prose-headings:scroll-mt-28">
             <MDXRemote
               source={markdownContent}
-              options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSanitize, rehypePrettyCode] } }}
+              options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug, rehypeSanitize, rehypePrettyCode] } }}
             />
           </div>
 
@@ -204,7 +147,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             <div className="bg-muted/50 space-y-4 rounded-lg p-6 backdrop-blur-sm">
               <h3 className="text-lg font-semibold">목차</h3>
               <nav className="space-y-3 text-sm">
-                {mockTableOfContents.map((item) => (
+                {listOfContents?.toc?.map((item: TocEntry) => (
                   <TableOfContentsLink key={item.id} item={item} />
                 ))}
               </nav>
