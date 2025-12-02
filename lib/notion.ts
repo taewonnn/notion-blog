@@ -117,7 +117,7 @@ const mapPageToPost = (page: PageObjectResponse): Post => {
 };
 
 // 게시글 조회
-export const getPublishedPosts = async (tag?: string) => {
+export const getPublishedPosts = async (tag?: string, sort?: string) => {
   try {
     const databaseId = process.env.NOTION_DATABASE_ID!;
 
@@ -158,7 +158,7 @@ export const getPublishedPosts = async (tag?: string) => {
       sorts: [
         {
           timestamp: 'created_time',
-          direction: 'descending',
+          direction: sort === 'latest' ? 'descending' : 'ascending',
         },
       ],
     });
@@ -171,6 +171,11 @@ export const getPublishedPosts = async (tag?: string) => {
       .sort((a, b) => {
         const dateA = a.date ?? a.modifiedDate ?? '';
         const dateB = b.date ?? b.modifiedDate ?? '';
+
+        if (sort === 'oldest') {
+          return dateA.localeCompare(dateB); // 오래된 순
+        }
+
         return dateB.localeCompare(dateA); // 최신순
       });
 

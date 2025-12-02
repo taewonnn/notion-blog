@@ -4,17 +4,19 @@ import ProfileSection from '@/app/_components/ProfileSection';
 import ContactSection from '@/app/_components/ContactSection';
 import Link from 'next/link';
 import { getPublishedPosts, getTags } from '@/lib/notion';
+import SortSelect from './_components/SortSelect';
 
 interface HomeProps {
-  searchParams: Promise<{ tag?: string }>;
+  searchParams: Promise<{ tag?: string; sort?: string }>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const { tag } = await searchParams;
+  const { tag, sort } = await searchParams;
+  const selectedSort = sort || '전체';
   const selectedTag = tag || '전체';
-  const [posts, tags] = await Promise.all([getPublishedPosts(selectedTag), getTags()]);
+  const [posts, tags] = await Promise.all([getPublishedPosts(selectedTag, selectedSort), getTags()]);
 
-  // console.log('!!!posts', posts);
+  console.log('posts:', posts);
 
   return (
     <div className="container py-8">
@@ -27,6 +29,7 @@ export default async function Home({ searchParams }: HomeProps) {
           {/* 섹션 제목 */}
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-bold tracking-tight">{selectedTag === '전체' ? '블로그 목록' : `${selectedTag} 관련 글`}</h2>
+            <SortSelect />
           </div>
 
           {/* 블로그 카드 그리드 */}
