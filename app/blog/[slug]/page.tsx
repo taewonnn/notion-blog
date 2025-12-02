@@ -130,7 +130,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           {metadata && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <div className="flexgap-2">{metadata.tags && metadata.tags.map((tag) => <Badge key={tag}>{tag}</Badge>)}</div>
+                <div className="flex gap-2">{metadata.tags && metadata.tags.map((tag) => <Badge key={tag}>{tag}</Badge>)}</div>
                 <h1 className="text-4xl font-bold">{metadata.title}</h1>
               </div>
 
