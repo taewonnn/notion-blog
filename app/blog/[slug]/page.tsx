@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { CalendarDays, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { getPostBySlug } from '@/lib/notion';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import { blocksToMarkdown } from '@/lib/markdown';
 
 interface TableOfContentsItem {
   id: string;
@@ -114,8 +116,9 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   }
 
   const { mdBlocks, metadata } = result;
-  // console.log('!!!blocks', mdBlocks);
-  // console.log('post', metadata);
+
+  // 재귀적으로 모든 블록(children 포함)을 마크다운으로 변환
+  const markdownContent = blocksToMarkdown(mdBlocks).join('\n\n');
 
   return (
     <div className="container py-12">
@@ -152,10 +155,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <Separator className="my-8" />
 
           {/* 블로그 본문 */}
-          <div className="prose prose-slate dark:prose-invert max-w-none">
-            {mdBlocks.map((block) => (
-              <div key={block.blockId}>{block.parent}</div>
-            ))}
+          <div className="prose prose-neutral prose-sm dark:prose-invert max-w-none">
+            <MDXRemote source={markdownContent} />
           </div>
 
           <Separator className="my-16" />
