@@ -16,7 +16,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const selectedTag = tag || '전체';
   const [posts, tags] = await Promise.all([getPublishedPosts(selectedTag, selectedSort), getTags()]);
 
-  console.log('posts:', posts);
+  // console.log('posts:', posts);
 
   return (
     <div className="container py-8">

@@ -12,8 +12,8 @@ export default async function DocsPage({ params }: DocsPageProps) {
   // Ex. URL에 http://localhost:3000/docs/2/fdsfdf로 들어가면 slug는 ['2', 'fdsfdf']가 담긴 배열
   // Ex. URL에 http://localhost:3000/docs로 가면 404 에러
   // ttp://localhost:3000/docs 에서도 정상 작동하게 하려면 -> [[...slug]] 로 변경
-  
-  console.log('slug', slug);
+
+  // console.log('slug', slug);
 
   if (!slug) {
     return (
