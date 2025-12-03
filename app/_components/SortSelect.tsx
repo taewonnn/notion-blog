@@ -9,7 +9,10 @@ export default function SortSelect() {
   const sort = searchParams.get('sort') || 'latest';
 
   const handleSortChange = (value: string) => {
-    router.push(`?sort=${value}`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('sort', value);
+
+    router.push(`?${params.toString()}`);
   };
 
   return (
